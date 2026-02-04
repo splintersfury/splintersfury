@@ -56,4 +56,6 @@ Security-Relevant Patches (ranked by exploitability)
 
 ---
 
+**Blog**: [threatunpacked.com](https://threatunpacked.com)
+
 <sub>Turning 4-12 hours of manual patch review into 2-5 minutes of automated triage.</sub>
