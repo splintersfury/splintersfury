@@ -41,7 +41,7 @@ graph LR
 | [**AutoPiff**](https://github.com/splintersfury/AutoPiff) | Semantic analysis engine for detecting vulnerability fixes in driver patches. 58 YAML rules across 22 categories, Ghidra decompilation, reachability tracing, scoring, and DriverAtlas triage. |
 | [**DriverAtlas**](https://github.com/splintersfury/DriverAtlas) | Structural analysis toolkit for Windows kernel drivers. Fingerprints frameworks, scores attack surface exposure (22 weighted rules, 0–15 scale), and hunts for high-risk drivers via VirusTotal Intelligence. |
 | [**driver_analyzer**](https://github.com/splintersfury/driver_analyzer) | Production pipeline that runs AutoPiff at scale. Karton + MWDB + Ghidra + MinIO, with dashboards, alerting, and driver monitoring. |
-| [**API_Calls-Hashes**](https://github.com/splintersfury/API_Calls-Hashes) | Windows API call hash reference for malware analysis. |
+
 
 ### What the Rules Detect
 
