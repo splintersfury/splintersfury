@@ -16,17 +16,20 @@ I'm still learning and improving these tools as I go.
 
 ### How It Works
 
-Drivers get picked up from public sources, decompiled with Ghidra, diffed against prior builds, run through semantic detection rules, scored, and flagged for review.
+Drivers get picked up from public sources, decompiled with Ghidra, diffed against prior builds, run through semantic detection rules, scored, and flagged for review. In parallel, every incoming driver is scored for attack surface exposure using DriverAtlas — high-risk drivers get flagged immediately, before patch analysis even finishes.
 
 ```mermaid
 graph LR
     sources["Driver Sources"]:::src --> analyze["Decompile &<br/>Diff"]
+    sources --> triage["Attack Surface<br/>Scoring"]:::triage
     analyze --> detect["Semantic<br/>Detection"]
     detect --> score["Score &<br/>Rank"]
     score --> report["Report"]
     score --> alert["Alert"]
+    triage --> alert
 
     classDef src fill:#1a1a2e,stroke:#e94560,color:#eee
+    classDef triage fill:#1a1a2e,stroke:#e9a345,color:#eee
     classDef default fill:#16213e,stroke:#0f3460,color:#eee
 ```
 
@@ -35,7 +38,8 @@ graph LR
 | | |
 |---|---|
 | [**KernelSight**](https://splintersfury.github.io/KernelSight/) | Knowledge base of Windows kernel driver exploitation techniques and attack surfaces. 28 case studies grounded in real CVEs with driver names, build numbers, and PoC references. |
-| [**AutoPiff**](https://github.com/splintersfury/AutoPiff) | Semantic analysis engine for detecting vulnerability fixes in driver patches. 58 YAML rules across 22 categories, Ghidra decompilation, reachability tracing, and scoring. |
+| [**AutoPiff**](https://github.com/splintersfury/AutoPiff) | Semantic analysis engine for detecting vulnerability fixes in driver patches. 58 YAML rules across 22 categories, Ghidra decompilation, reachability tracing, scoring, and DriverAtlas triage. |
+| [**DriverAtlas**](https://github.com/splintersfury/DriverAtlas) | Structural analysis toolkit for Windows kernel drivers. Fingerprints frameworks, scores attack surface exposure (22 weighted rules, 0–15 scale), and hunts for high-risk drivers via VirusTotal Intelligence. |
 | [**driver_analyzer**](https://github.com/splintersfury/driver_analyzer) | Production pipeline that runs AutoPiff at scale. Karton + MWDB + Ghidra + MinIO, with dashboards, alerting, and driver monitoring. |
 | [**API_Calls-Hashes**](https://github.com/splintersfury/API_Calls-Hashes) | Windows API call hash reference for malware analysis. |
 
