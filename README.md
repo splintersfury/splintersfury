@@ -1,31 +1,30 @@
 <h1 align="center">Ahmad Abdillah</h1>
 <p align="center">
-  <em>Malware analyst focused on Windows kernel driver security.</em>
+  <em>Windows kernel driver security research and tooling</em>
 </p>
 
 <p align="center">
   <a href="https://threatunpacked.com"><img src="https://img.shields.io/badge/blog-threatunpacked.com-0a0a0a?style=flat-square&logo=ghost&logoColor=white" alt="Blog"></a>
-  <a href="https://github.com/splintersfury"><img src="https://img.shields.io/badge/focus-kernel%20security-8b0000?style=flat-square" alt="Focus"></a>
+  <a href="https://splintersfury.github.io/KernelSight/"><img src="https://img.shields.io/badge/KernelSight-knowledge%20base-8b0000?style=flat-square" alt="KernelSight"></a>
 </p>
 
 ---
 
-I spend most of my time reversing Windows kernel drivers and looking at how vendors patch security bugs. A lot of driver updates ship quietly with no CVE or advisory, and the interesting fixes (use-after-free, missing bounds checks, IOCTL input validation) get buried under hundreds of cosmetic changes. Reviewing a single driver update manually takes anywhere from 4 to 12 hours.
+I reverse Windows kernel drivers and study how vendors patch security bugs. A lot of driver updates ship quietly with no CVE or advisory, and the real fixes — use-after-free, missing bounds checks, IOCTL validation — get buried under hundreds of cosmetic changes. Reviewing a single driver update manually takes 4 to 12 hours, so I built tooling to do it at scale.
 
-So I built a pipeline to do it automatically.
+I'm still learning and improving these tools as I go.
 
-### AutoPiff Pipeline
+### How It Works
 
-New driver versions get picked up from WinBIndex and VirusTotal, decompiled with Ghidra, diffed against prior builds, run through 58 semantic detection rules, scored by exploitability, and the interesting ones land in Telegram.
+Drivers get picked up from public sources, decompiled with Ghidra, diffed against prior builds, run through semantic detection rules, scored, and flagged for review.
 
 ```mermaid
 graph LR
-    sources["WinBIndex<br/>VirusTotal"]:::src --> monitor["Stage 0<br/>Monitor"]
-    monitor --> differ["Stages 1-4<br/>Patch Differ"]
-    differ --> reach["Stage 5<br/>Reachability"]
-    reach --> rank["Stage 6<br/>Ranking"]
-    rank --> report["Stage 7<br/>Report"]
-    rank --> alerter["Stage 8<br/>Alerter"]
+    sources["Driver Sources"]:::src --> analyze["Decompile &<br/>Diff"]
+    analyze --> detect["Semantic<br/>Detection"]
+    detect --> score["Score &<br/>Rank"]
+    score --> report["Report"]
+    score --> alert["Alert"]
 
     classDef src fill:#1a1a2e,stroke:#e94560,color:#eee
     classDef default fill:#16213e,stroke:#0f3460,color:#eee
@@ -33,36 +32,32 @@ graph LR
 
 ### Projects
 
-<table>
-  <tr>
-    <td><a href="https://github.com/splintersfury/AutoPiff"><b>AutoPiff</b></a></td>
-    <td>The analysis engine. Semantic YAML rules (58 rules, 22 categories), Ghidra scripts for decompilation and reachability tracing, scoring framework.</td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/splintersfury/driver_analyzer"><b>driver_analyzer</b></a></td>
-    <td>Production stack that runs AutoPiff at scale. Karton + MWDB + Ghidra + MinIO, with dashboards, alerting, and driver monitoring.</td>
-  </tr>
-</table>
+| | |
+|---|---|
+| [**KernelSight**](https://splintersfury.github.io/KernelSight/) | Knowledge base of Windows kernel driver exploitation techniques and attack surfaces. 28 case studies grounded in real CVEs with driver names, build numbers, and PoC references. |
+| [**AutoPiff**](https://github.com/splintersfury/AutoPiff) | Semantic analysis engine for detecting vulnerability fixes in driver patches. 58 YAML rules across 22 categories, Ghidra decompilation, reachability tracing, and scoring. |
+| [**driver_analyzer**](https://github.com/splintersfury/driver_analyzer) | Production pipeline that runs AutoPiff at scale. Karton + MWDB + Ghidra + MinIO, with dashboards, alerting, and driver monitoring. |
+| [**API_Calls-Hashes**](https://github.com/splintersfury/API_Calls-Hashes) | Windows API call hash reference for malware analysis. |
 
-### What It Catches
+### What the Rules Detect
 
-| Category | Example |
-|----------|---------|
-| Use-After-Free | `ExFreePool` followed by `ptr = NULL` |
-| Bounds Checks | Length validation before `memcpy` / `RtlCopyMemory` |
-| User Boundary | Added `ProbeForRead` / `ProbeForWrite` |
-| Integer Overflow | Safe math: `RtlULongAdd`, `RtlSizeTMult` |
-| Race Conditions | Interlocked ops, lock acquisition changes |
-| IOCTL Hardening | New input validation in dispatch handlers |
+| Category | What It Looks For |
+|----------|-------------------|
+| Use-After-Free | `ExFreePool` followed by pointer nullification |
+| Bounds Checks | Length validation added before `memcpy` / `RtlCopyMemory` |
+| User/Kernel Boundary | `ProbeForRead` / `ProbeForWrite` additions |
+| Integer Overflow | Safe math helpers: `RtlULongAdd`, `RtlSizeTMult` |
+| Race Conditions | Interlocked operations, lock acquisition changes |
+| IOCTL Hardening | Input validation in dispatch handlers |
 | Pool Corruption | Pool tag/type changes, NX pool migration |
-| Privilege Checks | `SeSinglePrivilegeCheck` / token validation added |
+| Privilege Checks | `SeSinglePrivilegeCheck` / token validation |
 
 ### Tech
 
 | | |
 |---|---|
-| **Analysis** | Python, Ghidra (headless), YAML rule engine, jsonschema |
-| **Infrastructure** | Karton, MWDB Core, Redis, RabbitMQ, MinIO, Docker Compose |
+| **Analysis** | Python, Ghidra (headless), YAML rule engine |
+| **Infrastructure** | Karton, MWDB Core, Redis, RabbitMQ, MinIO, Docker |
 | **RE Tooling** | IDA Pro, Ghidra, WinDbg, x64dbg |
 
 ---
